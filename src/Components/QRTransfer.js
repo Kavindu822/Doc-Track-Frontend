@@ -14,7 +14,7 @@ const QRTransfer = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await fetch("https://run.mocky.io/v3/3bf37652-c737-4eb0-acae-5477f7bafd92");
+        const response = await fetch("https://run.mocky.io/v3/8fd55c13-f5cb-4ec7-b0f3-3fdbafe886fc");
         if (!response.ok) {
           throw new Error("Failed to fetch files");
         }
