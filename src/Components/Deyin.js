@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AdminNavbar from "./AdminNavbar";
 import { AiOutlineSearch } from "react-icons/ai";
 
-const Files = () => {
+const Deyin = () => {
     const [files, setFiles] = useState([]); // Store files
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(null); // Error state
@@ -61,4 +61,4 @@ const Files = () => {
     );
 };
 
-export default Files;
+export default Deyin;
