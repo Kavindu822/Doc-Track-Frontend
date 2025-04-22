@@ -2,7 +2,7 @@
 // import AdminNavbar from "./AdminNavbar";
 // import axios from "axios";
 
-// const Admin = () => {
+// const Deying = () => {
 //   const [employees, setEmployees] = useState([]);
 //   const [filtered, setFiltered] = useState([]);
 //   const [search, setSearch] = useState("");
@@ -11,21 +11,25 @@
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const [itemsPerPage] = useState(10);
 
-//   // Modal state and selected employee for deletion
 //   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 //   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
 //   useEffect(() => {
 //     const fetchEmployees = async () => {
 //       try {
-//         const res = await axios.get("/api/UserAccounts/admins", {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-//           },
-//         });
+//         const res = await axios.get(
+//           "/api/UserAccounts/employees-by-department/Deying",
+//           {
+//             headers: {
+//               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+//             },
+//           }
+//         );
 
-//         setEmployees(res.data);
-//         setFiltered(res.data);
+//         // Filter only approved employees
+//         const approved = res.data.filter((emp) => emp.isApproved === true);
+//         setEmployees(approved);
+//         setFiltered(approved);
 //         setLoading(false);
 //       } catch (err) {
 //         setError("Failed to load employees.");
@@ -51,31 +55,29 @@
 //     }
 //   }, [search, employees]);
 
+//   const handleDeleteClick = (emp) => {
+//     setSelectedEmployee(emp); // Set the selected employee for deletion
+//     setDeleteModalOpen(true); // Open the confirmation modal
+//   };
+
 //   const handleDelete = async () => {
-//     const epfNo = selectedEmployee; // Use the selected employee's EPF number
+//     if (!selectedEmployee) return;
+
+//     const { epfNo } = selectedEmployee;
+
 //     try {
-//       const response = await fetch(`/api/UserAccounts/delete/${epfNo}`, {
-//         method: "DELETE",
+//       await axios.delete(`/api/UserAccounts/delete/${epfNo}`, {
 //         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+//           Authorization: `Bearer ${localStorage.getItem("token")}`,
 //         },
 //       });
 
-//       if (!response.ok) {
-//         const errorData = await response.json(); // get error details from the response
-//         console.error("Delete failed with status:", response.status, errorData);
-//         throw new Error("Delete failed");
-//       }
-
 //       setEmployees(employees.filter((e) => e.epfNo !== epfNo));
 //       setFiltered(filtered.filter((e) => e.epfNo !== epfNo));
-//       setDeleteModalOpen(false); // Close modal after successful deletion
+//       setDeleteModalOpen(false); // Close the modal after deletion
 //     } catch (err) {
 //       console.error("Delete failed", err);
-//       alert(
-//         "There was an issue deleting the employee. Please try again later."
-//       );
-//       setDeleteModalOpen(false); // Close modal on error
+//       alert("Delete failed. Please try again.");
 //     }
 //   };
 
@@ -87,11 +89,6 @@
 
 //   const handlePageChange = (page) => {
 //     setCurrentPage(page);
-//   };
-
-//   const openDeleteModal = (epfNo) => {
-//     setSelectedEmployee(epfNo); // Set the selected employee EPF number
-//     setDeleteModalOpen(true); // Open the modal
 //   };
 
 //   return (
@@ -139,7 +136,7 @@
 //                       {emp.contactNo}
 //                     </div>
 //                     <button
-//                       onClick={() => openDeleteModal(emp.epfNo)} // Open modal for selected employee
+//                       onClick={() => handleDeleteClick(emp)} // Open the modal with the selected employee
 //                       className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
 //                     >
 //                       Delete
@@ -170,11 +167,11 @@
 //       </div>
 
 //       {/* Delete Confirmation Modal */}
-//       {deleteModalOpen && (
+//       {deleteModalOpen && selectedEmployee && (
 //         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
 //           <div className="bg-white p-4 rounded-lg w-96">
 //             <h3 className="text-xl mb-4">
-//               Are you sure you want to delete this Admin?
+//               Are you sure you want to delete {selectedEmployee.name}?
 //             </h3>
 //             <div className="flex justify-between">
 //               <button
@@ -197,57 +194,115 @@
 //   );
 // };
 
-// export default Admin;
+// export default Deying;
 
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "./AdminNavbar";
 import axios from "axios";
-import { AiOutlineSearch } from "react-icons/ai";
 
-const Admin = () => {
+const Deying = () => {
   const [employees, setEmployees] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [resetModalOpen, setResetModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [temporaryPassword, setTemporaryPassword] = useState("");
+
+  const [resetPasswordVisibleFor, setResetPasswordVisibleFor] = useState(null);
+  const [tempPassword, setTempPassword] = useState("");
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get("/api/UserAccounts/admins", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        });
-        setEmployees(res.data);
-        setFiltered(res.data);
+        const res = await axios.get(
+          "/api/UserAccounts/employees-by-department/Deying",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+          }
+        );
+        const approved = res.data.filter((emp) => emp.isApproved === true);
+        setEmployees(approved);
+        setFiltered(approved);
+        setLoading(false);
       } catch (err) {
         setError("Failed to load employees.");
-      } finally {
         setLoading(false);
       }
     };
-
     fetchEmployees();
   }, []);
 
   useEffect(() => {
-    const lower = search.toLowerCase();
-    const results = employees.filter(
-      (e) =>
-        e.epfNo.toLowerCase().includes(lower) ||
-        e.eName.toLowerCase().includes(lower) ||
-        (e.seatNo && e.seatNo.toLowerCase().includes(lower))
-    );
-    setFiltered(search.trim() === "" ? employees : results);
+    if (search.trim() === "") {
+      setFiltered(employees);
+    } else {
+      const lower = search.toLowerCase();
+      const results = employees.filter(
+        (e) =>
+          e.epfNo.toLowerCase().includes(lower) ||
+          e.name.toLowerCase().includes(lower) ||
+          (e.seatNo && e.seatNo.toLowerCase().includes(lower))
+      );
+      setFiltered(results);
+    }
   }, [search, employees]);
+
+  const handleDeleteClick = (emp) => {
+    setSelectedEmployee(emp);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedEmployee) return;
+    const { epfNo } = selectedEmployee;
+    try {
+      await axios.delete(`/api/UserAccounts/delete/${epfNo}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setEmployees(employees.filter((e) => e.epfNo !== epfNo));
+      setFiltered(filtered.filter((e) => e.epfNo !== epfNo));
+      setDeleteModalOpen(false);
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Delete failed. Please try again.");
+    }
+  };
+
+  const handleResetPassword = async (emp) => {
+    if (!tempPassword.trim()) {
+      alert("Please enter a temporary password.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "/api/UserAccounts/admin-reset-password",
+        {
+          epfNo: emp.epfNo,
+          temporaryPassword: tempPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        }
+      );
+      alert(`Temporary password set for ${emp.eName}`);
+      setResetPasswordVisibleFor(null);
+      setTempPassword("");
+    } catch (err) {
+      console.error("Password reset failed", err);
+      alert("Password reset failed. Please try again.");
+    }
+  };
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const currentItems = filtered.slice(
@@ -255,53 +310,8 @@ const Admin = () => {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page) => setCurrentPage(page);
-
-  const handleDelete = async () => {
-    if (!selectedEmployee) return;
-
-    try {
-      await axios.delete(`/api/UserAccounts/delete/${selectedEmployee.epfNo}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-        },
-      });
-      setEmployees((prev) =>
-        prev.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
-      );
-      setFiltered((prev) =>
-        prev.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
-      );
-      setDeleteModalOpen(false);
-    } catch (err) {
-      alert("Failed to delete employee.");
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!selectedEmployee || !temporaryPassword) return;
-
-    try {
-      await axios.post(
-        "/api/UserAccounts/admin-reset-password",
-        {
-          epfNo: selectedEmployee.epfNo,
-          temporaryPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      alert("Password reset successful.");
-      setResetModalOpen(false);
-      setTemporaryPassword("");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to reset password.");
-    }
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -313,64 +323,78 @@ const Admin = () => {
           style={{ backgroundImage: "url('/bg.jpg')" }}
         ></div>
 
-        {/* Search Bar */}
-        <div className="relative z-10 flex items-center justify-center p-4">
-          <div className="flex items-center w-full max-w-md bg-white bg-opacity-90 rounded-full px-4 py-2 shadow-md">
-            <AiOutlineSearch className="text-gray-600 text-xl mr-2" />
-            <input
-              type="text"
-              placeholder="Search Admin"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500 font-semibold"
-            />
-          </div>
+        <div className="z-10 relative mt-4 mb-4 w-full max-w-md mx-auto">
+          <input
+            type="text"
+            placeholder="Search Employee"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-white opacity-90 focus:ring-2 focus:ring-[#00a2cd] transition duration-200 truncate placeholder:text-sm placeholder:font-bold"
+          />
         </div>
 
-        {/* Content */}
         <div className="relative z-10 w-full h-full px-4 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-700">
           {loading ? (
             <p className="text-white text-center">Loading...</p>
           ) : error ? (
             <p className="text-red-500 text-center">{error}</p>
           ) : filtered.length === 0 ? (
-            <p className="text-gray-300 text-center">No admins found.</p>
+            <p className="text-gray-300 text-center">
+              No approved employees found.
+            </p>
           ) : (
             <div className="flex flex-col items-center">
-              {/* Admin Rows */}
               <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-black bg-opacity-50 rounded-lg space-y-3">
                 {currentItems.map((emp, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center bg-[#0b4b61] bg-opacity-80 text-white px-4 py-2 rounded-md shadow-md"
-                  >
-                    <div className="text-sm sm:text-base font-semibold text-center w-full">
-                      {emp.eName} - {emp.epfNo} - {emp.seatNo || "N/A"} -{" "}
-                      {emp.contactNo}
+                  <div key={idx}>
+                    <div className="flex justify-between items-center bg-[#0b4b61] bg-opacity-80 text-white px-4 py-2 rounded-md shadow-md">
+                      <div className="text-sm sm:text-base font-semibold text-center w-full">
+                        {emp.eName} - {emp.epfNo} - {emp.seatNo || "N/A"} -{" "}
+                        {emp.contactNo}
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() =>
+                            setResetPasswordVisibleFor(
+                              resetPasswordVisibleFor === emp.epfNo
+                                ? null
+                                : emp.epfNo
+                            )
+                          }
+                          className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 rounded text-sm font-bold text-white"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(emp)}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm font-bold text-white"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        setSelectedEmployee(emp);
-                        setDeleteModalOpen(true);
-                      }}
-                      className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedEmployee(emp);
-                        setResetModalOpen(true);
-                      }}
-                      className="ml-4 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-sm font-bold"
-                    >
-                      Reset
-                    </button>
+
+                    {resetPasswordVisibleFor === emp.epfNo && (
+                      <div className="mt-2 bg-white p-2 rounded-md shadow-md flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={tempPassword}
+                          onChange={(e) => setTempPassword(e.target.value)}
+                          placeholder="Enter temporary password"
+                          className="flex-1 p-2 border border-gray-300 rounded-md"
+                        />
+                        <button
+                          onClick={() => handleResetPassword(emp)}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold"
+                        >
+                          OK
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
 
-              {/* Pagination */}
               <div className="mt-4 flex flex-wrap gap-2 justify-center">
                 {Array.from({ length: totalPages }, (_, index) => (
                   <button
@@ -389,69 +413,33 @@ const Admin = () => {
             </div>
           )}
         </div>
-
-        {/* Delete Modal */}
-        {deleteModalOpen && selectedEmployee && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white p-4 rounded-lg w-96">
-              <h3 className="text-xl mb-4">
-                Are you sure you want to delete {selectedEmployee.eName}?
-              </h3>
-              <div className="flex justify-between">
-                <button
-                  onClick={() => setDeleteModalOpen(false)}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-red-500 text-white rounded-md"
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Reset Password Modal */}
-        {resetModalOpen && selectedEmployee && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white p-4 rounded-lg w-96">
-              <h3 className="text-xl mb-4">
-                Reset Password for {selectedEmployee.eName}
-              </h3>
-              <input
-                type="password"
-                placeholder="Enter temporary password"
-                value={temporaryPassword}
-                onChange={(e) => setTemporaryPassword(e.target.value)}
-                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
-              />
-              <div className="flex justify-between">
-                <button
-                  onClick={() => {
-                    setResetModalOpen(false);
-                    setTemporaryPassword("");
-                  }}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleResetPassword}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                >
-                  OK
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {deleteModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div className="bg-white p-4 rounded-lg w-96">
+            <h3 className="text-xl mb-4">
+              Are you sure you want to delete {selectedEmployee.name}?
+            </h3>
+            <div className="flex justify-between">
+              <button
+                onClick={() => setDeleteModalOpen(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-md"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Admin;
+export default Deying;

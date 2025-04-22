@@ -1,64 +1,142 @@
 import React, { useState, useEffect } from "react";
-import NavBar from "./NavBar";
+import Navbar from "./NavBar";
+import { AiOutlineSearch } from "react-icons/ai";
+import axios from "axios";
 
 const MyHistory = () => {
-   const [files, setFiles] = useState([]); // Store fetched files
-    const [loading, setLoading] = useState(true); // Loading state
-    const [error, setError] = useState(null); // Error state
-  // Error state
+  const [history, setHistory] = useState([]); // History state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const historyPerPage = 20; // Items per page for pagination
 
   useEffect(() => {
-    // Fetch data from backend
-    const fetchFiles = async () => {
-      try {
-        const response = await fetch("https://run.mocky.io/v3/8fd55c13-f5cb-4ec7-b0f3-3fdbafe886fc"); // Replace with your API URL
-        if (!response.ok) {
-          throw new Error("Failed to fetch files");
-        }
-        const data = await response.json();
-        setFiles(data); // Update state with fetched data
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFiles();
+    fetchUserHistory();
   }, []);
-  return (
-    <div className="flex items-center h-screen bg-primaryBg">
-      <NavBar />
-    <div className="relative flex flex-col items-center justify-end w-full h-screen">
-      {/* Background with Darkened Image */}
-      <div 
-        className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
-        style={{ backgroundImage: "url('/bg.jpg')" }}
-      ></div>
 
-      {/* Foreground Content (Stays Bright) */}
-      <div className="relative z-10 rounded-lg w-2/3 h-2/3">
-        <div className="h-1/2 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-700 m-3">
+  const fetchUserHistory = async () => {
+    try {
+      const token = localStorage.getItem("jwtToken"); // Assuming JWT is stored here
+      if (!token) {
+        setError("User not authenticated.");
+        return;
+      }
+
+      const response = await axios.get("/api/RcodeFiles/my-history", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setHistory(response.data); // ✅ Correct setter
+    } catch (err) {
+      console.error("Error:", err.response?.data || err.message); // More helpful error
+      setError("Failed to fetch history");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredHistory = history
+    .filter(
+      (record) =>
+        record.rcode.toLowerCase().includes(search.toLowerCase()) ||
+        record.eName.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.transferDate) - new Date(a.transferDate));
+
+  const indexOfLastRecord = currentPage * historyPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - historyPerPage;
+  const currentHistory = filteredHistory.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  return (
+    <div className="flex h-screen bg-primaryBg">
+      <Navbar />
+      <div className="relative flex flex-col w-full h-screen">
+        <div
+          className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
+          style={{ backgroundImage: "url('/bg.jpg')" }}
+        ></div>
+
+        {/* Search Bar */}
+        <div className="relative flex items-center justify-start p-4 z-30">
+          <div className="flex items-center w-full max-w-md bg-white bg-opacity-90 rounded-full px-4 py-2 shadow-md">
+            <AiOutlineSearch className="text-gray-600 text-xl mr-2" />
+            <input
+              type="text"
+              placeholder="Search History"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500 font-semibold"
+            />
+          </div>
+        </div>
+
+        {/* History List */}
+        <div className="relative z-10 w-full h-full p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-700">
           {loading ? (
-            <p className="text-white text-center">Loading files...</p>
+            <p className="text-white text-center">Loading history...</p>
           ) : error ? (
             <p className="text-red-500 text-center">{error}</p>
+          ) : currentHistory.length === 0 ? (
+            <p className="text-gray-300 text-center">No history found.</p>
           ) : (
-            files.map((file, index) => (
-              <div
-                key={index}
-                className="bg-[#00a2cd] text-white text-center py-2 m-2 rounded-full"
-              >
-                {file.RCode} - {file.GetDate} -{file.EmployeeName} - {file.EmployeeNo} 
-
+            <div className="flex flex-col items-center">
+              <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-[#eeeee4] bg-opacity-60 rounded-lg space-y-3">
+                {currentHistory.map((record, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center bg-[#0b4b61] bg-opacity-80 text-white px-4 py-2 rounded-md shadow-md"
+                  >
+                    {/* Display Rcode */}
+                    <div className="text-sm sm:text-base font-semibold text-center w-full">
+                      <span className="font-bold">Code: </span>
+                      {record.rcode}
+                    </div>
+                    {/* Display Date and Time */}
+                    <div className="text-sm sm:text-base font-semibold text-center w-full">
+                      <span className="font-bold">Date: </span>
+                      {new Date(record.transferDate).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))
+              {/* Pagination */}
+              <div className="mt-4 flex justify-center space-x-2">
+                {[
+                  ...Array(Math.ceil(filteredHistory.length / historyPerPage)),
+                ].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => paginate(index + 1)}
+                    className={`px-4 py-2 rounded-md ${
+                      currentPage === index + 1
+                        ? "bg-blue-700 text-white"
+                        : "bg-blue-500 text-white"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
     </div>
-</div>
   );
 };
 
-export default  MyHistory ;
+export default MyHistory;
