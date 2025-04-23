@@ -1,34 +1,35 @@
 // import React, { useState, useEffect } from "react";
 // import AdminNavbar from "./AdminNavbar";
+// import { AiOutlineSearch } from "react-icons/ai";
 // import axios from "axios";
 
-// const Admin = () => {
+// const Quality = () => {
 //   const [employees, setEmployees] = useState([]);
 //   const [filtered, setFiltered] = useState([]);
 //   const [search, setSearch] = useState("");
 //   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState("");
 //   const [currentPage, setCurrentPage] = useState(1);
-//   const [itemsPerPage] = useState(10);
-
-//   // Modal state and selected employee for deletion
-//   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-//   const [selectedEmployee, setSelectedEmployee] = useState(null);
+//   const [itemsPerPage] = useState(5);
+//   const [deleteModalOpen, setDeleteModalOpen] = useState(false); // Manage modal visibility
+//   const [selectedEmployee, setSelectedEmployee] = useState(null); // Store selected employee for deletion
 
 //   useEffect(() => {
 //     const fetchEmployees = async () => {
 //       try {
-//         const res = await axios.get("/api/UserAccounts/admins", {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-//           },
-//         });
-
+//         const res = await axios.get(
+//           "/api/UserAccounts/employees-by-department/Quality",
+//           {
+//             headers: {
+//               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+//             },
+//           }
+//         );
 //         setEmployees(res.data);
 //         setFiltered(res.data);
-//         setLoading(false);
 //       } catch (err) {
 //         setError("Failed to load employees.");
+//       } finally {
 //         setLoading(false);
 //       }
 //     };
@@ -37,47 +38,15 @@
 //   }, []);
 
 //   useEffect(() => {
-//     if (search.trim() === "") {
-//       setFiltered(employees);
-//     } else {
-//       const lower = search.toLowerCase();
-//       const results = employees.filter(
-//         (e) =>
-//           e.epfNo.toLowerCase().includes(lower) ||
-//           e.name.toLowerCase().includes(lower) ||
-//           (e.seatNo && e.seatNo.toLowerCase().includes(lower))
-//       );
-//       setFiltered(results);
-//     }
+//     const lower = search.toLowerCase();
+//     const results = employees.filter(
+//       (e) =>
+//         e.epfNo.toLowerCase().includes(lower) ||
+//         e.name.toLowerCase().includes(lower) ||
+//         (e.seatNo && e.seatNo.toLowerCase().includes(lower))
+//     );
+//     setFiltered(search.trim() === "" ? employees : results);
 //   }, [search, employees]);
-
-//   const handleDelete = async () => {
-//     const epfNo = selectedEmployee; // Use the selected employee's EPF number
-//     try {
-//       const response = await fetch(`/api/UserAccounts/delete/${epfNo}`, {
-//         method: "DELETE",
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-//         },
-//       });
-
-//       if (!response.ok) {
-//         const errorData = await response.json(); // get error details from the response
-//         console.error("Delete failed with status:", response.status, errorData);
-//         throw new Error("Delete failed");
-//       }
-
-//       setEmployees(employees.filter((e) => e.epfNo !== epfNo));
-//       setFiltered(filtered.filter((e) => e.epfNo !== epfNo));
-//       setDeleteModalOpen(false); // Close modal after successful deletion
-//     } catch (err) {
-//       console.error("Delete failed", err);
-//       alert(
-//         "There was an issue deleting the employee. Please try again later."
-//       );
-//       setDeleteModalOpen(false); // Close modal on error
-//     }
-//   };
 
 //   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 //   const currentItems = filtered.slice(
@@ -85,13 +54,27 @@
 //     currentPage * itemsPerPage
 //   );
 
-//   const handlePageChange = (page) => {
-//     setCurrentPage(page);
-//   };
+//   const handlePageChange = (page) => setCurrentPage(page);
 
-//   const openDeleteModal = (epfNo) => {
-//     setSelectedEmployee(epfNo); // Set the selected employee EPF number
-//     setDeleteModalOpen(true); // Open the modal
+//   const handleDelete = async () => {
+//     if (!selectedEmployee) return;
+
+//     try {
+//       await axios.delete(`/api/UserAccounts/delete/${selectedEmployee.epfNo}`, {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("token")}`,
+//         },
+//       });
+//       setEmployees(
+//         employees.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
+//       );
+//       setFiltered(
+//         filtered.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
+//       );
+//       setDeleteModalOpen(false); // Close the modal after deletion
+//     } catch (err) {
+//       alert("Failed to delete employee.");
+//     }
 //   };
 
 //   return (
@@ -105,14 +88,17 @@
 //         ></div>
 
 //         {/* Search Bar */}
-//         <div className="z-10 relative mt-4 mb-4 w-full max-w-md mx-auto">
-//           <input
-//             type="text"
-//             placeholder="Search Employee"
-//             value={search}
-//             onChange={(e) => setSearch(e.target.value)}
-//             className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-white opacity-90 focus:ring-2 focus:ring-[#00a2cd] transition duration-200 truncate placeholder:text-sm placeholder:font-bold"
-//           />
+//         <div className="relative z-10 flex items-center justify-center p-4">
+//           <div className="flex items-center w-full max-w-md bg-white bg-opacity-90 rounded-full px-4 py-2 shadow-md">
+//             <AiOutlineSearch className="text-gray-600 text-xl mr-2" />
+//             <input
+//               type="text"
+//               placeholder="Search Employee"
+//               value={search}
+//               onChange={(e) => setSearch(e.target.value)}
+//               className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500 font-semibold"
+//             />
+//           </div>
 //         </div>
 
 //         {/* Content */}
@@ -122,9 +108,7 @@
 //           ) : error ? (
 //             <p className="text-red-500 text-center">{error}</p>
 //           ) : filtered.length === 0 ? (
-//             <p className="text-gray-300 text-center">
-//               No approved employees found.
-//             </p>
+//             <p className="text-gray-300 text-center">No employees found.</p>
 //           ) : (
 //             <div className="flex flex-col items-center">
 //               {/* Employee Rows */}
@@ -139,7 +123,10 @@
 //                       {emp.contactNo}
 //                     </div>
 //                     <button
-//                       onClick={() => openDeleteModal(emp.epfNo)} // Open modal for selected employee
+//                       onClick={() => {
+//                         setSelectedEmployee(emp);
+//                         setDeleteModalOpen(true); // Open modal when delete button is clicked
+//                       }}
 //                       className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
 //                     >
 //                       Delete
@@ -158,7 +145,7 @@
 //                       currentPage === index + 1
 //                         ? "bg-[#007d9c] text-white"
 //                         : "bg-white text-black"
-//                     }`}
+//                     } text-white`}
 //                   >
 //                     {index + 1}
 //                   </button>
@@ -167,44 +154,44 @@
 //             </div>
 //           )}
 //         </div>
-//       </div>
 
-//       {/* Delete Confirmation Modal */}
-//       {deleteModalOpen && (
-//         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-//           <div className="bg-white p-4 rounded-lg w-96">
-//             <h3 className="text-xl mb-4">
-//               Are you sure you want to delete this Admin?
-//             </h3>
-//             <div className="flex justify-between">
-//               <button
-//                 onClick={() => setDeleteModalOpen(false)} // Close the modal without deleting
-//                 className="px-4 py-2 bg-gray-500 text-white rounded-md"
-//               >
-//                 Cancel
-//               </button>
-//               <button
-//                 onClick={handleDelete} // Proceed with delete
-//                 className="px-4 py-2 bg-red-500 text-white rounded-md"
-//               >
-//                 Confirm
-//               </button>
+//         {/* Delete Confirmation Modal */}
+//         {deleteModalOpen && selectedEmployee && (
+//           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+//             <div className="bg-white p-4 rounded-lg w-96">
+//               <h3 className="text-xl mb-4">
+//                 Are you sure you want to delete {selectedEmployee.name}?
+//               </h3>
+//               <div className="flex justify-between">
+//                 <button
+//                   onClick={() => setDeleteModalOpen(false)}
+//                   className="px-4 py-2 bg-gray-500 text-white rounded-md"
+//                 >
+//                   Cancel
+//                 </button>
+//                 <button
+//                   onClick={handleDelete}
+//                   className="px-4 py-2 bg-red-500 text-white rounded-md"
+//                 >
+//                   Confirm
+//                 </button>
+//               </div>
 //             </div>
 //           </div>
-//         </div>
-//       )}
+//         )}
+//       </div>
 //     </div>
 //   );
 // };
 
-// export default Admin;
+// export default Quality;
 
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "./AdminNavbar";
-import axios from "axios";
 import { AiOutlineSearch } from "react-icons/ai";
+import axios from "axios";
 
-const Admin = () => {
+const Quality = () => {
   const [employees, setEmployees] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
@@ -212,20 +199,22 @@ const Admin = () => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [resetModalOpen, setResetModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false); // Manage modal visibility
+  const [resetModalOpen, setResetModalOpen] = useState(false); // Reset password modal visibility
+  const [selectedEmployee, setSelectedEmployee] = useState(null); // Store selected employee for deletion
+  const [temporaryPassword, setTemporaryPassword] = useState(""); // Temporary password input
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get("/api/UserAccounts/admins", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-        });
+        const res = await axios.get(
+          "/api/UserAccounts/employees-by-department/Quality",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+          }
+        );
         setEmployees(res.data);
         setFiltered(res.data);
       } catch (err) {
@@ -243,7 +232,7 @@ const Admin = () => {
     const results = employees.filter(
       (e) =>
         e.epfNo.toLowerCase().includes(lower) ||
-        e.eName.toLowerCase().includes(lower) ||
+        e.name.toLowerCase().includes(lower) ||
         (e.seatNo && e.seatNo.toLowerCase().includes(lower))
     );
     setFiltered(search.trim() === "" ? employees : results);
@@ -263,16 +252,16 @@ const Admin = () => {
     try {
       await axios.delete(`/api/UserAccounts/delete/${selectedEmployee.epfNo}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setEmployees((prev) =>
-        prev.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
+      setEmployees(
+        employees.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
       );
-      setFiltered((prev) =>
-        prev.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
+      setFiltered(
+        filtered.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
       );
-      setDeleteModalOpen(false);
+      setDeleteModalOpen(false); // Close the modal after deletion
     } catch (err) {
       alert("Failed to delete employee.");
     }
@@ -283,23 +272,20 @@ const Admin = () => {
 
     try {
       await axios.post(
-        "/api/UserAccounts/admin-reset-password",
+        `/api/UserAccounts/admin-reset-password`,
         {
           epfNo: selectedEmployee.epfNo,
-          temporaryPassword,
+          temporaryPassword: temporaryPassword,
         },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            "Content-Type": "application/json",
           },
         }
       );
       alert("Password reset successful.");
-      setResetModalOpen(false);
-      setTemporaryPassword("");
+      setResetModalOpen(false); // Close the reset modal
     } catch (err) {
-      console.error(err);
       alert("Failed to reset password.");
     }
   };
@@ -308,6 +294,7 @@ const Admin = () => {
     <div className="flex h-screen bg-primaryBg">
       <AdminNavbar />
       <div className="relative flex flex-col w-full h-screen">
+        {/* Background */}
         <div
           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
           style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -319,7 +306,7 @@ const Admin = () => {
             <AiOutlineSearch className="text-gray-600 text-xl mr-2" />
             <input
               type="text"
-              placeholder="Search Admin"
+              placeholder="Search Employee"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500 font-semibold"
@@ -334,10 +321,10 @@ const Admin = () => {
           ) : error ? (
             <p className="text-red-500 text-center">{error}</p>
           ) : filtered.length === 0 ? (
-            <p className="text-gray-300 text-center">No admins found.</p>
+            <p className="text-gray-300 text-center">No employees found.</p>
           ) : (
             <div className="flex flex-col items-center">
-              {/* Admin Rows */}
+              {/* Employee Rows */}
               <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-black bg-opacity-50 rounded-lg space-y-3">
                 {currentItems.map((emp, idx) => (
                   <div
@@ -351,7 +338,7 @@ const Admin = () => {
                     <button
                       onClick={() => {
                         setSelectedEmployee(emp);
-                        setDeleteModalOpen(true);
+                        setDeleteModalOpen(true); // Open modal when delete button is clicked
                       }}
                       className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
                     >
@@ -360,7 +347,7 @@ const Admin = () => {
                     <button
                       onClick={() => {
                         setSelectedEmployee(emp);
-                        setResetModalOpen(true);
+                        setResetModalOpen(true); // Open reset password modal
                       }}
                       className="ml-4 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-sm font-bold"
                     >
@@ -380,7 +367,7 @@ const Admin = () => {
                       currentPage === index + 1
                         ? "bg-[#007d9c] text-white"
                         : "bg-white text-black"
-                    }`}
+                    } text-white`}
                   >
                     {index + 1}
                   </button>
@@ -390,12 +377,12 @@ const Admin = () => {
           )}
         </div>
 
-        {/* Delete Modal */}
+        {/* Delete Confirmation Modal */}
         {deleteModalOpen && selectedEmployee && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg w-96">
               <h3 className="text-xl mb-4">
-                Are you sure you want to delete {selectedEmployee.eName}?
+                Are you sure you want to delete {selectedEmployee.name}?
               </h3>
               <div className="flex justify-between">
                 <button
@@ -420,7 +407,7 @@ const Admin = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg w-96">
               <h3 className="text-xl mb-4">
-                Reset Password for {selectedEmployee.eName}
+                Reset Password for {selectedEmployee.name}
               </h3>
               <input
                 type="password"
@@ -431,10 +418,7 @@ const Admin = () => {
               />
               <div className="flex justify-between">
                 <button
-                  onClick={() => {
-                    setResetModalOpen(false);
-                    setTemporaryPassword("");
-                  }}
+                  onClick={() => setResetModalOpen(false)}
                   className="px-4 py-2 bg-gray-500 text-white rounded-md"
                 >
                   Cancel
@@ -454,4 +438,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Quality;

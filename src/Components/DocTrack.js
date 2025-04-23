@@ -25,9 +25,7 @@ const DocTrack = () => {
     setShowHistory(false);
 
     try {
-      const response = await fetch(
-        `http://localhost:5208/api/RcodeFiles/${searchCode}`
-      );
+      const response = await fetch(`/api/RcodeFiles/${searchCode}`);
 
       if (!response.ok) {
         throw new Error("Document not found or an error occurred.");
@@ -52,9 +50,7 @@ const DocTrack = () => {
     setError(null);
 
     try {
-      const response = await fetch(
-        `http://localhost:5208/api/RcodeFiles/${searchCode}/history`
-      );
+      const response = await fetch(`/api/RcodeFiles/${searchCode}/history`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch document history.");
@@ -166,7 +162,7 @@ const DocTrack = () => {
                 <strong>{documentDetails.rcode} → </strong>
                 <strong> {documentDetails.epfNo}</strong> -{" "}
                 <strong>{documentDetails.eName}</strong> -{" "}
-                <strong>{documentDetails.status}</strong> -{" "}
+                <strong>{documentDetails.contactNo}</strong> -{" "}
                 <strong>
                   {new Date(documentDetails.getDate).toLocaleDateString()}
                 </strong>{" "}

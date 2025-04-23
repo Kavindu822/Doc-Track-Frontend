@@ -2,109 +2,366 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "./NavBar";
 
-const SeatTransfer = () => {
-  const [employees, setEmployees] = useState([]); // Store employee data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [selectedEmployee, setSelectedEmployee] = useState(null); // Store selected employee
+const SeatTransfer = ({ selectedFiles, onCancel, onTransferComplete }) => {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [transferSuccess, setTransferSuccess] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingTransfer, setPendingTransfer] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch employee data from backend
     const fetchEmployees = async () => {
       try {
-        const response = await fetch("https://run.mocky.io/v3/8fd55c13-f5cb-4ec7-b0f3-3fdbafe886fc"); // Replace with actual API endpoint
+        const token = localStorage.getItem("jwtToken");
+        const response = await fetch(
+          "http://localhost:5208/api/UserAccounts/eligible-seat-transfer-users",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         if (!response.ok) {
-          throw new Error("Failed to fetch employee data");
+          throw new Error("Failed to fetch eligible users");
         }
+
         const data = await response.json();
-        setEmployees(data); // Store employee data
+        setEmployees(data);
       } catch (err) {
-        setError(err.message); // Handle error
+        setError(err.message);
       } finally {
-        setLoading(false); // Stop loading once data is fetched
+        setLoading(false);
       }
     };
 
-    fetchEmployees(); // Call fetchEmployees on component mount
+    fetchEmployees();
   }, []);
 
-  // Handle employee selection
   const handleEmployeeSelect = (emp) => {
-    setSelectedEmployee(emp); // Set the selected employee
+    setPendingTransfer(emp);
+    setShowConfirmModal(true);
   };
 
-  // Handle "Library" selection
   const handleLibrarySelect = () => {
-    setSelectedEmployee({ EmployeeNo: "Library", EmployeeName: "Library" });
+    setPendingTransfer({
+      epfNo: "Library",
+      eName: "Library",
+      contactNo: "N/A",
+    });
+    setShowConfirmModal(true);
+  };
+
+  const handleFileTransfer = async (emp) => {
+    try {
+      const token = localStorage.getItem("jwtToken");
+      const response = await fetch(
+        "http://localhost:5208/api/RcodeFiles/update-multi-files",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rcodes: selectedFiles.map((file) => file.rcode),
+            newEpfNo: emp.epfNo,
+            newEName: emp.eName,
+            newContactNo: emp.contactNo || "",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update files");
+      }
+
+      setSelectedEmployee(emp);
+      setTransferSuccess(true);
+      onTransferComplete();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
-    <div className="flex items-center h-screen bg-primaryBg">
-      <NavBar onSeatTransferClick={() => navigate("/seat-transfer")} />
-      <div className="relative flex flex-col items-center justify-end w-full h-screen">
-        {/* Background */}
+    <div className="flex h-screen bg-primaryBg">
+      <NavBar />
+      <div className="relative flex flex-col w-full h-screen">
+        {/* Background with Darkened Image */}
         <div
           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
           style={{ backgroundImage: "url('/bg.jpg')" }}
         ></div>
 
-        {/* Foreground Content */}
-        <div className="relative h-4/5 z-10 p-5 rounded-lg w-1/3 shadow-lg text-center">
-          {selectedEmployee ? (
-            // If an employee or "Library" is selected, show success message
-            <div className="text-white font-bold text-lg">
-              <p>Assignment Successful to {selectedEmployee.EmployeeName}</p>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-lg font-semibold mb-4 text-white">Assign this file to whom?</h2>
-              {loading ? (
-                <p className="text-gray-600">Loading employees...</p>
-              ) : error ? (
-                <p className="text-red-500">{error}</p>
-              ) : (
-                <div className="p-4">
-                  {/* First 7 static rows */}
-                  <div className="mb-4">
-                    {employees.slice(0, 7).map((emp) => (
-                      <button
-                        key={emp.RCode}
-                        onClick={() => handleEmployeeSelect(emp)} // Set the selected employee
-                        className="bg-[#00a2cd] text-white text-center py-2 px-4 m-2 rounded-full w-full hover:bg-blue-600"
-                      >
-                        {emp.EmployeeNo} - {emp.EmployeeName}
-                      </button>
-                    ))}
-                  </div>
+        <div className="relative flex flex-col items-center w-full h-2/4 bg-[#eeeee4] bg-opacity-50 shadow-xl justify-center text-center">
+          <h1 className="text-2xl font-bold mb-6">Seat Transfer</h1>
 
-                  {/* Scrollable container for remaining employees */}
-                  <div className="max-h-[280px] overflow-y-auto">
-                    {employees.slice(7).map((emp) => (
-                      <button
-                        key={emp.RCode}
-                        onClick={() => handleEmployeeSelect(emp)} // Set the selected employee
-                        className="bg-[#00a2cd] text-white text-center py-2 px-4 m-2 rounded-full w-full hover:bg-blue-600"
-                      >
-                        {emp.EmployeeNo} - {emp.EmployeeName}
-                      </button>
-                    ))}
-                  </div>
+          <div className="w-full space-y-4">
+            {loading ? (
+              <p className="text-center text-gray-700">
+                Loading eligible employees...
+              </p>
+            ) : error ? (
+              <p className="text-red-500 text-center">{error}</p>
+            ) : transferSuccess ? (
+              <p className="text-green-600 text-lg font-semibold">
+                ✅ Files have been successfully transferred to{" "}
+                <span className="font-bold">{selectedEmployee.eName}</span>.
+              </p>
+            ) : (
+              <>
+                <button
+                  onClick={handleLibrarySelect}
+                  className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+                >
+                  Transfer to Library
+                </button>
+                <div className="space-y-2">
+                  {employees.map((emp, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleEmployeeSelect(emp)}
+                      className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
+                    >
+                      {emp.eName}
+                    </button>
+                  ))}
                 </div>
-              )}
-              {/* Default Library option */}
-              <button
-                onClick={handleLibrarySelect} // Set the selected employee to "Library"
-                className="bg-[#00a2cd] text-white text-center py-2 px-4 m-2 rounded-full w-full hover:bg-blue-600"
-              >
-                Library
-              </button>
-            </>
-          )}
+              </>
+            )}
+          </div>
+
+          <div className="mt-6">
+            <button
+              onClick={onCancel}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && pendingTransfer && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-80 shadow-xl text-center">
+              <p className="text-lg font-semibold mb-4">
+                Confirm transfer to{" "}
+                <span className="font-bold">{pendingTransfer.eName}</span> (
+                {pendingTransfer.epfNo})?
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={async () => {
+                    await handleFileTransfer(pendingTransfer);
+                    setShowConfirmModal(false);
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default SeatTransfer;
+
+// import React, { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import NavBar from "./NavBar";
+
+// const SeatTransfer = ({ selectedFiles, onCancel, onTransferComplete }) => {
+//   const [employees, setEmployees] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [selectedEmployee, setSelectedEmployee] = useState(null);
+//   const [transferSuccess, setTransferSuccess] = useState(false);
+//   const [showConfirmModal, setShowConfirmModal] = useState(false);
+//   const [pendingTransfer, setPendingTransfer] = useState(null);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const fetchEmployees = async () => {
+//       try {
+//         const token = localStorage.getItem("jwtToken");
+//         const response = await fetch(
+//           "http://localhost:5208/api/UserAccounts/eligible-seat-transfer-users",
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           }
+//         );
+
+//         if (!response.ok) {
+//           throw new Error("Failed to fetch eligible users");
+//         }
+
+//         const data = await response.json();
+//         setEmployees(data);
+//       } catch (err) {
+//         setError(err.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchEmployees();
+//   }, []);
+
+//   const handleEmployeeSelect = (emp) => {
+//     setPendingTransfer(emp);
+//     setShowConfirmModal(true);
+//   };
+
+//   const handleLibrarySelect = () => {
+//     setPendingTransfer({
+//       epfNo: "Library",
+//       eName: "Library",
+//       contactNo: "N/A",
+//     });
+//     setShowConfirmModal(true);
+//   };
+
+//   const handleFileTransfer = async (emp) => {
+//     try {
+//       const token = localStorage.getItem("jwtToken");
+//       const response = await fetch(
+//         "http://localhost:5208/api/RcodeFiles/update-multi-files",
+//         {
+//           method: "PUT",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization: `Bearer ${token}`,
+//           },
+//           body: JSON.stringify({
+//             rcodes: selectedFiles.map((file) => file.rcode),
+//             newEpfNo: emp.epfNo,
+//             newEName: emp.eName,
+//             newContactNo: emp.contactNo || "",
+//           }),
+//         }
+//       );
+
+//       if (!response.ok) {
+//         throw new Error("Failed to update files");
+//       }
+
+//       setSelectedEmployee(emp);
+//       setTransferSuccess(true);
+//       onTransferComplete();
+//     } catch (err) {
+//       setError(err.message);
+//     }
+//   };
+
+//   return (
+//     <div className="flex items-center justify-center h-screen bg-primaryBg relative">
+//       {/* NavBar with z-index to stay on top */}
+//       <div className="absolute top-0 left-0 w-full z-30">
+//         <NavBar onSeatTransferClick={() => navigate("/seat-transfer")} />
+//       </div>
+
+//       {/* Background image with dark overlay */}
+//       <div
+//         className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
+//         style={{ backgroundImage: "url('/bg.jpg')" }}
+//       ></div>
+
+//       <div className="z-20 p-8 w-full max-w-md mx-auto bg-white bg-opacity-90 rounded-xl shadow-xl flex flex-col items-center justify-center text-center">
+//         <h1 className="text-2xl font-bold mb-6">Seat Transfer</h1>
+
+//         <div className="w-full space-y-4">
+//           {loading ? (
+//             <p className="text-center text-gray-700">
+//               Loading eligible employees...
+//             </p>
+//           ) : error ? (
+//             <p className="text-red-500 text-center">{error}</p>
+//           ) : transferSuccess ? (
+//             <p className="text-green-600 text-lg font-semibold">
+//               ✅ Files have been successfully transferred to{" "}
+//               <span className="font-bold">{selectedEmployee.eName}</span>.
+//             </p>
+//           ) : (
+//             <>
+//               <button
+//                 onClick={handleLibrarySelect}
+//                 className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+//               >
+//                 Transfer to Library
+//               </button>
+//               <div className="space-y-2">
+//                 {employees.map((emp, index) => (
+//                   <button
+//                     key={index}
+//                     onClick={() => handleEmployeeSelect(emp)}
+//                     className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
+//                   >
+//                     {emp.eName}
+//                   </button>
+//                 ))}
+//               </div>
+//             </>
+//           )}
+//         </div>
+
+//         <div className="mt-6">
+//           <button
+//             onClick={onCancel}
+//             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+//           >
+//             Cancel
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Confirmation Modal */}
+//       {showConfirmModal && pendingTransfer && (
+//         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+//           <div className="bg-white rounded-lg p-6 w-80 shadow-xl text-center">
+//             <p className="text-lg font-semibold mb-4">
+//               Confirm transfer to{" "}
+//               <span className="font-bold">{pendingTransfer.eName}</span> (
+//               {pendingTransfer.epfNo})?
+//             </p>
+//             <div className="flex justify-center gap-4">
+//               <button
+//                 onClick={async () => {
+//                   await handleFileTransfer(pendingTransfer);
+//                   setShowConfirmModal(false);
+//                 }}
+//                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+//               >
+//                 Confirm
+//               </button>
+//               <button
+//                 onClick={() => setShowConfirmModal(false)}
+//                 className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default SeatTransfer;

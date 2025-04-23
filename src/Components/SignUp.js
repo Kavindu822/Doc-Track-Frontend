@@ -20,6 +20,10 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Phone number regex (basic validation for a 10-digit number)
+  const phoneNumberRegex = /^[0-9]{10}$/;
+
+  // Function to handle form input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -27,45 +31,56 @@ const SignUp = () => {
     });
   };
 
+  // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate form fields
     if (
       !formData.employeeName ||
       !formData.contactNumber ||
       !formData.role ||
       !formData.password ||
-      formData.password !== formData.confirmPassword
+      !formData.confirmPassword
     ) {
-      setError("Please fill all fields correctly!");
+      setError("Please fill all fields.");
+      return;
+    }
+
+    // Validate phone number format
+    if (!phoneNumberRegex.test(formData.contactNumber)) {
+      setError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    // Validate password match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Password and Confirm Password do not match.");
       return;
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:5208/api/UserAccounts/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            epfNo: formData.epfNumber,
-            name: formData.employeeName,
-            phone: formData.contactNumber,
-            department: formData.department,
-            seatNo: formData.seatNumber,
-            password: formData.password,
-            role: formData.role,
-          }),
-        }
-      );
+      const response = await fetch("/api/UserAccounts/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          epfNo: formData.epfNumber,
+          eName: formData.employeeName,
+          contactNo: formData.contactNumber, // ✅ FIXED
+          department: formData.department,
+          seatNo: formData.seatNumber,
+          password: formData.password,
+          role: formData.role,
+        }),
+      });
 
       const data = await response.json();
-      console.log("API Response:", data); // For debugging
+      console.log("API Response:", data);
 
       if (response.ok) {
-        navigate("/"); // ✅ Redirect to login on success
+        navigate("/"); // Redirect to login on success
       } else {
         setError(data?.message || "Signup failed. Please try again.");
       }
@@ -85,10 +100,11 @@ const SignUp = () => {
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative flex flex-col items-center w-full h-1/4">
           <div className="flex items-center justify-center gap-2 text-white">
-            <p>Already have an account?</p>
+            {/* Bold the text and button */}
+            <p className="font-bold">Already have an account?</p>
             <button
-              className="text-[#00a2cd] hover:opacity-90"
-              onClick={() => navigate("/login")}
+              className="text-[#00a2cd] hover:opacity-90 font-bold"
+              onClick={() => navigate("/")}
             >
               Login
             </button>
@@ -97,8 +113,11 @@ const SignUp = () => {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center justify-center h-screen w-3/5 p-10 rounded-lg shadow-lg">
+      <div className="flex items-center justify-center h-screen w-3/5 p-5 rounded-lg shadow-lg">
         <form className="w-full space-y-4" onSubmit={handleSubmit}>
+          <div className="flex justify-center mt-0 mb-2">
+            <img src="/logo1.jpg" alt="Logo" className="w-80 h-auto" />
+          </div>
           <div className="flex gap-4">
             {/* Left Side */}
             <div className="w-1/2 space-y-4">
