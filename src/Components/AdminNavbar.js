@@ -161,7 +161,7 @@ const AdminNavbar = () => {
       hasSubMenu: true,
       subMenu: [
         {
-          name: "Deying",
+          name: "Dyeing",
           path: "/admin-dashboard/employee/deying",
           icon: <DoublePlayIcon />,
         },

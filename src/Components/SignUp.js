@@ -192,7 +192,7 @@ const SignUp = () => {
                   <option value="" disabled hidden>
                     Select Department
                   </option>
-                  <option value="Deying">Deying</option>
+                  <option value="Deying">Dyeing</option>
                   <option value="Quality">Quality</option>
                 </select>
                 <FaAngleDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" />

@@ -120,7 +120,7 @@ const AddFiles = () => {
                       className="w-full p-2 mt-1 border border-gray-300 rounded-md"
                     >
                       <option value="">Select Department</option>
-                      <option value="Deying">Deying</option>
+                      <option value="Deying">Dyeing</option>
                       <option value="Quality">Quality</option>
                     </select>
                   </div>
