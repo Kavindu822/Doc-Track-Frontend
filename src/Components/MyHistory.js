@@ -4,12 +4,12 @@ import { AiOutlineSearch } from "react-icons/ai";
 import axios from "axios";
 
 const MyHistory = () => {
-  const [history, setHistory] = useState([]); // History state
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const historyPerPage = 20; // Items per page for pagination
+  const historyPerPage = 20;
 
   useEffect(() => {
     fetchUserHistory();
@@ -17,31 +17,30 @@ const MyHistory = () => {
 
   const fetchUserHistory = async () => {
     try {
-      const token = localStorage.getItem("jwtToken"); // Assuming JWT is stored here
+      const token = localStorage.getItem("jwtToken");
       if (!token) {
         setError("User not authenticated.");
+        setLoading(false);
         return;
       }
 
-      const response = await axios.get("/api/RcodeFiles/my-history", {
+      const response = await axios.get(`/api/RcodeFiles/my-history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setHistory(response.data); // ✅ Correct setter
+      setHistory(response.data);
     } catch (err) {
-      console.error("Error:", err.response?.data || err.message); // More helpful error
       setError("Failed to fetch history");
     } finally {
       setLoading(false);
     }
   };
 
+  // Safe filtering on rcode only
   const filteredHistory = history
-    .filter(
-      (record) =>
-        record.rcode.toLowerCase().includes(search.toLowerCase()) ||
-        record.eName.toLowerCase().includes(search.toLowerCase())
+    .filter((record) =>
+      (record.rcode || "").toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => new Date(b.transferDate) - new Date(a.transferDate));
 
@@ -64,8 +63,8 @@ const MyHistory = () => {
         ></div>
 
         {/* Search Bar */}
-        <div className="relative flex items-center justify-start p-4 z-30">
-          <div className="flex items-center w-full max-w-md bg-white bg-opacity-90 rounded-full px-4 py-2 shadow-md">
+        <div className="relative flex justify-center p-4 z-30">
+          <div className="flex items-center w-full max-w-md bg-white bg-opacity-90 rounded-full px-3 py-2 shadow-md mx-4 sm:mx-0">
             <AiOutlineSearch className="text-gray-600 text-xl mr-2" />
             <input
               type="text"
@@ -87,32 +86,36 @@ const MyHistory = () => {
             <p className="text-gray-300 text-center">No history found.</p>
           ) : (
             <div className="flex flex-col items-center">
-              <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-[#eeeee4] bg-opacity-60 rounded-lg space-y-3">
+              <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-[#eeeee4] bg-opacity-20 rounded-lg space-y-3">
                 {currentHistory.map((record, index) => (
                   <div
                     key={index}
                     className="flex justify-between items-center bg-[#0b4b61] bg-opacity-80 text-white px-4 py-2 rounded-md shadow-md"
                   >
-                    {/* Display Rcode */}
                     <div className="text-sm sm:text-base font-semibold text-center w-full">
                       <span className="font-bold">Code: </span>
                       {record.rcode}
                     </div>
-                    {/* Display Date and Time */}
                     <div className="text-sm sm:text-base font-semibold text-center w-full">
                       <span className="font-bold">Date: </span>
-                      {new Date(record.transferDate).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
+                      {record.transferDate
+                        ? new Date(record.transferDate).toLocaleString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )
+                        : "N/A"}
                     </div>
                   </div>
                 ))}
               </div>
+
               {/* Pagination */}
               <div className="mt-4 flex justify-center space-x-2">
                 {[

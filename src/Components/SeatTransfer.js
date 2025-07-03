@@ -58,22 +58,19 @@ const SeatTransfer = ({ selectedFiles, onCancel, onTransferComplete }) => {
   const handleFileTransfer = async (emp) => {
     try {
       const token = localStorage.getItem("jwtToken");
-      const response = await fetch(
-        "http://localhost:5208/api/RcodeFiles/update-multi-files",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            rcodes: selectedFiles.map((file) => file.rcode),
-            newEpfNo: emp.epfNo,
-            newEName: emp.eName,
-            newContactNo: emp.contactNo || "",
-          }),
-        }
-      );
+      const response = await fetch("/api/RcodeFiles/update-multi-files", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rcodes: selectedFiles.map((file) => file.rcode),
+          newEpfNo: emp.epfNo,
+          newEName: emp.eName,
+          newContactNo: emp.contactNo || "",
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update files");

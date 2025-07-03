@@ -109,18 +109,17 @@ const DocTrack = () => {
       {!showHistory ? (
         <div className="relative flex flex-col items-center w-full h-full justify-center px-4 sm:px-6 lg:px-8">
           {/* Heading */}
-          <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-center text-white mt-24 mb-4">
+          <p className="text-xl sm:text-3xl lg:text-3xl font-semibold text-center text-white mt-60 mb-2">
             Track your document here!
           </p>
 
-          {/* Arrow */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth={1.5}
+            strokeWidth={5.5}
             stroke="currentColor"
-            className="w-12 h-12 text-[#00a2cd] animate-bounce mb-6"
+            className="w-25 h-20 text-[#00a2cd] animate-bounce mb-2"
           >
             <path
               strokeLinecap="round"
@@ -130,7 +129,7 @@ const DocTrack = () => {
           </svg>
 
           {/* Search Bar */}
-          <div className="relative flex items-center w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-2">
+          <div className="relative flex items-center w-full sm:w-2/3 md:w-1/2 lg:w-1/3 mt-1">
             <input
               className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-white focus:ring-2 focus:ring-[#00a2cd] transition duration-200 truncate placeholder:text-sm placeholder:font-bold"
               placeholder="Enter Document Code"

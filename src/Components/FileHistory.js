@@ -124,8 +124,9 @@ const FileHistory = () => {
                     className="w-full p-2 bg-transparent text-gray-800 rounded-md focus:outline-none"
                   >
                     <option value="">Filter by Department</option>
-                    <option value="Quality">Quality</option>
-                    <option value="Dyeing">Dyeing</option>
+                    <option value="Quality">Quality-Lanka</option>
+                    <option value="Dyeing">Dyeing-Lanka</option>
+                    <option value="DyeingI">Dyeing-India</option>
                   </select>
                 </div>
               </div>
