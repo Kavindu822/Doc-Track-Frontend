@@ -17,7 +17,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await fetch(
-        "/api/UserAccounts/set-new-password-after-temp",
+        `/api/UserAccounts/set-new-password-after-temp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

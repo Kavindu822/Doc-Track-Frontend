@@ -30,7 +30,6 @@
 //         const parsed = JSON.parse(data);
 
 //         if (Array.isArray(parsed.rcodes)) {
-//           // If it's a 1-element array that contains a stringified array, parse again
 //           if (
 //             parsed.rcodes.length === 1 &&
 //             typeof parsed.rcodes[0] === "string" &&
@@ -42,7 +41,6 @@
 //           }
 //         }
 //       } else {
-//         // If the data is not in JSON format, handle it as comma-separated values
 //         rcodesOnly = data.split(",").map((code) => code.trim());
 //       }
 
@@ -60,7 +58,7 @@
 //       const newContactNo = String(decoded.ContactNo || decoded.contactNo || "");
 
 //       const payload = {
-//         rcodes: rcodesOnly, // Ensure rcodes is an array
+//         rcodes: rcodesOnly,
 //         newEpfNo,
 //         newEName,
 //         newContactNo,
@@ -88,17 +86,11 @@
 //       return;
 //     }
 
-//     console.log("Sending payload to server:", decodedJson); // Log the payload
+//     console.log("Sending payload to server:", decodedJson);
 
 //     try {
-//       console.log(
-//         "✅ Clean rcodes array:",
-//         Array.isArray(decodedJson.rcodes),
-//         decodedJson.rcodes
-//       );
-
 //       const response = await axios.put(
-//         "http://localhost:5208/api/RcodeFiles/transfer-files-to-employee-or-via-qr",
+//         `/api/RcodeFiles/transfer-files-to-employee-or-via-qr`,
 //         decodedJson,
 //         {
 //           headers: { Authorization: `Bearer ${token}` },
@@ -122,7 +114,7 @@
 //   return (
 //     <div className="flex items-center h-screen bg-primaryBg">
 //       <NavBar />
-//       <div className="relative flex flex-col items-center justify-end w-full h-screen">
+//       <div className="relative flex flex-col items-center justify-end w-full h-screen p-4">
 //         <div
 //           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
 //           style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -135,21 +127,24 @@
 //           </p>
 
 //           {showScanner ? (
-//             <div className="mt-4">
+//             <div className="mt-4 flex flex-col items-center">
 //               <QRScanner
 //                 onScanSuccess={handleScanSuccess}
 //                 onScanError={handleScanError}
 //                 fps={10}
-//                 qrbox={250}
+//                 qrbox={300}
 //                 ref={scannerRef}
 //                 onStreamReady={(stream) => setScannerStream(stream)}
 //               />
-//               <button
-//                 onClick={handleScannerClose}
-//                 className="bg-red-600 text-white px-4 py-2 rounded mt-4"
-//               >
-//                 ❌ Close Camera
-//               </button>
+
+//               <div className="mt-4">
+//                 <button
+//                   onClick={handleScannerClose}
+//                   className="bg-red-600 text-white px-4 py-2 rounded"
+//                 >
+//                   ❌ Close Camera
+//                 </button>
+//               </div>
 //             </div>
 //           ) : (
 //             <button
@@ -163,7 +158,7 @@
 //           {decodedJson && (
 //             <>
 //               <p className="text-green-400 text-lg font-semibold mt-6">
-//                 ✅ Scan completed successfully!
+//                 ✅ Received successfully!
 //               </p>
 //               <div className="text-white mt-4 w-full max-w-lg p-4 bg-black bg-opacity-60 rounded-lg shadow-lg">
 //                 <h3 className="text-2xl font-semibold mb-4">Scanned Data:</h3>
@@ -192,16 +187,6 @@
 //                 >
 //                   📨 Take File
 //                 </button>
-
-//                 {/* Raw payload display */}
-//                 <div className="mt-6 bg-gray-800 text-white p-4 rounded-lg">
-//                   <h4 className="text-lg font-semibold mb-2">
-//                     📦 Full Payload:
-//                   </h4>
-//                   <pre className="whitespace-pre-wrap break-words">
-//                     {JSON.stringify(decodedJson, null, 2)}
-//                   </pre>
-//                 </div>
 //               </div>
 //             </>
 //           )}
@@ -218,12 +203,14 @@ import NavBar from "./NavBar";
 import QRScanner from "./QRScanner";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom"; // 👈 Add this
 
 const TakeFile = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [decodedJson, setDecodedJson] = useState(null);
   const [scannerStream, setScannerStream] = useState(null);
   const scannerRef = useRef(null);
+  const navigate = useNavigate(); // 👈 Add this
 
   const stopMediaStream = (stream) => {
     if (stream) {
@@ -245,7 +232,6 @@ const TakeFile = () => {
         const parsed = JSON.parse(data);
 
         if (Array.isArray(parsed.rcodes)) {
-          // If it's a 1-element array that contains a stringified array, parse again
           if (
             parsed.rcodes.length === 1 &&
             typeof parsed.rcodes[0] === "string" &&
@@ -257,7 +243,6 @@ const TakeFile = () => {
           }
         }
       } else {
-        // If the data is not in JSON format, handle it as comma-separated values
         rcodesOnly = data.split(",").map((code) => code.trim());
       }
 
@@ -275,13 +260,11 @@ const TakeFile = () => {
       const newContactNo = String(decoded.ContactNo || decoded.contactNo || "");
 
       const payload = {
-        rcodes: rcodesOnly, // Ensure rcodes is an array
+        rcodes: rcodesOnly,
         newEpfNo,
         newEName,
         newContactNo,
       };
-
-      console.log("✅ Cleaned Payload:", payload);
 
       setDecodedJson(payload);
       setShowScanner(false);
@@ -297,23 +280,14 @@ const TakeFile = () => {
 
   const handleTakeFile = async () => {
     const token = localStorage.getItem("jwtToken");
-    console.log("JWT Token:", token);
     if (!token) {
       alert("⚠️ Please log in first.");
       return;
     }
 
-    console.log("Sending payload to server:", decodedJson); // Log the payload
-
     try {
-      console.log(
-        "✅ Clean rcodes array:",
-        Array.isArray(decodedJson.rcodes),
-        decodedJson.rcodes
-      );
-
-      const response = await axios.put(
-        "http://localhost:5208/api/RcodeFiles/transfer-files-to-employee-or-via-qr",
+      await axios.put(
+        `/api/RcodeFiles/transfer-files-to-employee-or-via-qr`,
         decodedJson,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -322,6 +296,7 @@ const TakeFile = () => {
 
       alert("✅ Files transferred successfully!");
       setDecodedJson(null);
+      navigate("/my-files"); // 👈 Navigate after success
     } catch (error) {
       console.error("❌ File transfer failed:", error);
       alert("❌ File transfer failed.");
@@ -337,7 +312,7 @@ const TakeFile = () => {
   return (
     <div className="flex items-center h-screen bg-primaryBg">
       <NavBar />
-      <div className="relative flex flex-col items-center justify-end w-full h-screen">
+      <div className="relative flex flex-col items-center justify-end w-full h-screen p-4">
         <div
           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
           style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -350,21 +325,24 @@ const TakeFile = () => {
           </p>
 
           {showScanner ? (
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col items-center">
               <QRScanner
                 onScanSuccess={handleScanSuccess}
                 onScanError={handleScanError}
                 fps={10}
-                qrbox={250}
+                qrbox={300}
                 ref={scannerRef}
                 onStreamReady={(stream) => setScannerStream(stream)}
               />
-              <button
-                onClick={handleScannerClose}
-                className="bg-red-600 text-white px-4 py-2 rounded mt-4"
-              >
-                ❌ Close Camera
-              </button>
+
+              <div className="mt-4">
+                <button
+                  onClick={handleScannerClose}
+                  className="bg-red-600 text-white px-4 py-2 rounded"
+                >
+                  ❌ Close Camera
+                </button>
+              </div>
             </div>
           ) : (
             <button
@@ -378,7 +356,7 @@ const TakeFile = () => {
           {decodedJson && (
             <>
               <p className="text-green-400 text-lg font-semibold mt-6">
-                ✅ Scan completed successfully!
+                ✅ Scanned successfully!
               </p>
               <div className="text-white mt-4 w-full max-w-lg p-4 bg-black bg-opacity-60 rounded-lg shadow-lg">
                 <h3 className="text-2xl font-semibold mb-4">Scanned Data:</h3>

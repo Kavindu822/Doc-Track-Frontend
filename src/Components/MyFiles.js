@@ -22,14 +22,11 @@ const MyFiles = () => {
   const fetchFiles = async () => {
     try {
       const token = localStorage.getItem("jwtToken");
-      const response = await axios.get(
-        "http://localhost:5208/api/RcodeFiles/my-files",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`/api/RcodeFiles/my-files`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setFiles(
         response.data.sort((a, b) => new Date(b.getDate) - new Date(a.getDate))
       );
@@ -94,15 +91,15 @@ const MyFiles = () => {
   return (
     <div className="flex h-screen bg-primaryBg">
       <Navbar />
-      <div className="relative flex flex-col w-full h-screen">
+      <div className="relative flex flex-col w-full h-screen pt-16 sm:pt-0">
         <div
           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
           style={{ backgroundImage: "url('/bg.jpg')" }}
         ></div>
 
-        {/* Search Bar */}
-        <div className="relative flex items-center justify-start p-4 z-30">
-          <div className="flex items-center w-full max-w-md bg-white bg-opacity-90 rounded-full px-4 py-2 shadow-md">
+        {/* Sticky Search Bar (Always Visible) */}
+        <div className="sticky top-0 z-30 p-4 bg-primaryBg bg-opacity-90 backdrop-blur-md">
+          <div className="flex items-center w-full max-w-md mx-auto bg-white rounded-full px-4 py-2 shadow-md">
             <AiOutlineSearch className="text-gray-600 text-xl mr-2" />
             <input
               type="text"
@@ -154,7 +151,7 @@ const MyFiles = () => {
               </div>
 
               {/* File Rows */}
-              <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-[#eeeee4] bg-opacity-60 rounded-lg space-y-3">
+              <div className="shadow-lg mt-4 p-4 w-full max-w-3xl bg-[#eeeee4] bg-opacity-20 rounded-lg space-y-3">
                 {currentFiles.map((file, index) => (
                   <div
                     key={index}

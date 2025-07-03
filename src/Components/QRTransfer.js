@@ -16,7 +16,7 @@ const QRTransfer = ({ selectedFileIds, onCancel }) => {
   return (
     <div className="flex items-center h-screen bg-primaryBg">
       <NavBar />
-      <div className="relative flex flex-col items-center justify-center w-full h-screen">
+      <div className="relative flex flex-col w-full h-screen pt-20 sm:pt-18">
         <div
           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
           style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -29,7 +29,7 @@ const QRTransfer = ({ selectedFileIds, onCancel }) => {
               size={300}
               className="p-4 bg-white rounded-lg shadow-lg"
             />
-            <p className="bg-red-500 p-5 rounded-lg text-white font-extrabold w-2/3 text-2xl m-4 flex justify-center">
+            <p className="bg-red-500 p-3 rounded-lg text-white font-extrabold w-1/3 text-xl m-4 flex justify-center">
               Scan Me
             </p>
             <button
