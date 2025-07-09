@@ -3,13 +3,14 @@ import NavBar from "./NavBar";
 import QRScanner from "./QRScanner";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom"; // 👈 Add this
 
 const TakeFile = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [decodedJson, setDecodedJson] = useState(null);
   const [scannerStream, setScannerStream] = useState(null);
-  const [facingMode, setFacingMode] = useState("environment"); // default to back camera
   const scannerRef = useRef(null);
+  const navigate = useNavigate(); // 👈 Add this
 
   const stopMediaStream = (stream) => {
     if (stream) {
@@ -65,8 +66,6 @@ const TakeFile = () => {
         newContactNo,
       };
 
-      console.log("✅ Cleaned Payload:", payload);
-
       setDecodedJson(payload);
       setShowScanner(false);
     } catch (error) {
@@ -81,17 +80,14 @@ const TakeFile = () => {
 
   const handleTakeFile = async () => {
     const token = localStorage.getItem("jwtToken");
-    console.log("JWT Token:", token);
     if (!token) {
       alert("⚠️ Please log in first.");
       return;
     }
 
-    console.log("Sending payload to server:", decodedJson);
-
     try {
-      const response = await axios.put(
-        "/api/RcodeFiles/transfer-files-to-employee-or-via-qr",
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/RcodeFiles/transfer-files-to-employee-or-via-qr`,
         decodedJson,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -100,6 +96,7 @@ const TakeFile = () => {
 
       alert("✅ Files transferred successfully!");
       setDecodedJson(null);
+      navigate("/my-files"); // 👈 Navigate after success
     } catch (error) {
       console.error("❌ File transfer failed:", error);
       alert("❌ File transfer failed.");
@@ -136,28 +133,14 @@ const TakeFile = () => {
                 qrbox={300}
                 ref={scannerRef}
                 onStreamReady={(stream) => setScannerStream(stream)}
-                videoConstraints={{
-                  facingMode: { exact: facingMode },
-                }}
               />
 
-              <div className="flex gap-4 mt-4">
+              <div className="mt-4">
                 <button
                   onClick={handleScannerClose}
                   className="bg-red-600 text-white px-4 py-2 rounded"
                 >
                   ❌ Close Camera
-                </button>
-
-                <button
-                  onClick={() =>
-                    setFacingMode((prev) =>
-                      prev === "environment" ? "user" : "environment"
-                    )
-                  }
-                  className="bg-yellow-500 text-white px-4 py-2 rounded"
-                >
-                  🔄 Switch Camera
                 </button>
               </div>
             </div>
@@ -173,7 +156,7 @@ const TakeFile = () => {
           {decodedJson && (
             <>
               <p className="text-green-400 text-lg font-semibold mt-6">
-                ✅ Scan completed successfully!
+                ✅ Scanned successfully!
               </p>
               <div className="text-white mt-4 w-full max-w-lg p-4 bg-black bg-opacity-60 rounded-lg shadow-lg">
                 <h3 className="text-2xl font-semibold mb-4">Scanned Data:</h3>

@@ -17,7 +17,16 @@ const QRScanner = ({
     Html5Qrcode.getCameras()
       .then((devices) => {
         if (devices && devices.length) {
-          const cameraId = devices[0].id;
+          // Try to find environment-facing (back) camera
+          const environmentCamera = devices.find(
+            (device) =>
+              device.label.toLowerCase().includes("back") ||
+              device.label.toLowerCase().includes("environment")
+          );
+
+          const cameraId = environmentCamera
+            ? environmentCamera.id
+            : devices[0].id;
 
           html5QrCodeRef.current
             .start(

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import AdminNavbar from "./AdminNavbar";
 import { AiOutlineSearch } from "react-icons/ai";
 import axios from "axios";
+import "../App.css"; // Import custom scrollbar styles
 
 const Quality = () => {
   const [employees, setEmployees] = useState([]);
@@ -20,7 +21,7 @@ const Quality = () => {
     const fetchEmployees = async () => {
       try {
         const res = await axios.get(
-          "/api/UserAccounts/employees-by-department/Quality",
+          `${process.env.REACT_APP_API_URL}/UserAccounts/employees-by-department/Quality-Lanka`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -61,11 +62,14 @@ const Quality = () => {
     if (!selectedEmployee) return;
 
     try {
-      await axios.delete(`/api/UserAccounts/delete/${selectedEmployee.epfNo}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/UserAccounts/delete/${selectedEmployee.epfNo}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        }
+      );
       setEmployees((prev) =>
         prev.filter((emp) => emp.epfNo !== selectedEmployee.epfNo)
       );
@@ -83,10 +87,10 @@ const Quality = () => {
 
     try {
       await axios.post(
-        `/api/UserAccounts/admin-reset-password`,
+        `${process.env.REACT_APP_API_URL}/UserAccounts/admin-reset-password`,
         {
           epfNo: selectedEmployee.epfNo,
-          temporaryPassword: temporaryPassword,
+          temporaryPassword,
         },
         {
           headers: {
@@ -96,15 +100,16 @@ const Quality = () => {
       );
       alert("Password reset successful.");
       setResetModalOpen(false);
+      setTemporaryPassword("");
     } catch (err) {
       alert("Failed to reset password.");
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-primaryBg">
+    <div className="flex h-screen bg-primaryBg">
       <AdminNavbar />
-      <div className="relative flex flex-col flex-1">
+      <div className="relative flex flex-col w-full h-screen pt-16 sm:pt-0">
         <div
           className="absolute inset-0 bg-center bg-cover before:absolute before:inset-0 before:bg-black before:opacity-50"
           style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -126,7 +131,7 @@ const Quality = () => {
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto max-h-[calc(100vh-150px)] px-2">
+          <div className="overflow-y-auto max-h-[calc(100vh-150px)] px-2 custom-scrollbar">
             {loading ? (
               <p className="text-white text-center">Loading...</p>
             ) : error ? (
@@ -194,7 +199,7 @@ const Quality = () => {
             <div className="bg-white p-5 rounded-lg w-full max-w-md space-y-4">
               <h3 className="text-lg font-semibold">
                 Are you sure you want to delete{" "}
-                <span className="text-red-600">{selectedEmployee.name}</span>?
+                <span className="text-red-600">{selectedEmployee.eName}</span>?
               </h3>
               <div className="flex justify-end gap-3">
                 <button
@@ -219,7 +224,7 @@ const Quality = () => {
           <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center px-2">
             <div className="bg-white p-5 rounded-lg w-full max-w-md space-y-4">
               <h3 className="text-lg font-semibold">
-                Reset Password for {selectedEmployee.name}
+                Reset Password for {selectedEmployee.eName}
               </h3>
               <input
                 type="password"

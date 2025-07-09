@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Play, Menu } from "lucide-react";
+import { Play, Menu, LogOut } from "lucide-react";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const DoublePlayIcon = () => (
   <div className="flex items-center">
@@ -20,6 +22,7 @@ const Navbar = () => {
     { name: "My Files", path: "/my-files", icon: <DoublePlayIcon /> },
     { name: "Take File", path: "/take-file", icon: <DoublePlayIcon /> },
     { name: "My History", path: "/my-history", icon: <DoublePlayIcon /> },
+    { name: "My Profile", path: "/my-profile", icon: <DoublePlayIcon /> },
   ];
 
   useEffect(() => {
@@ -42,80 +45,107 @@ const Navbar = () => {
     }));
   };
 
+  const handleLogout = () => {
+    confirmAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to logout?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            localStorage.removeItem("jwtToken");
+            navigate("/");
+            setIsMobileOpen(false);
+          },
+        },
+        { label: "No" },
+      ],
+    });
+  };
+
   return (
     <>
-      {/* Mobile Top Navbar */}
-      <div className="md:hidden flex items-center justify-between bg-primaryBg -px-1 -py-1 text-white shadow-md fixed top-0 left-0 right-0 z-50 border-b border-white/20">
-        <img src="/logo1.jpg" alt="Logo" className="h-24 w-auto -ml-5" />
+      {/* ✅ Mobile Top Navbar (Only on Mobile) */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-primaryBg px-4 py-2 flex items-center justify-between text-white shadow-md border-b border-white/20">
+        <img src="/logo1.jpg" alt="Logo" className="h-14 w-auto" />
         <button onClick={() => setIsMobileOpen(!isMobileOpen)}>
-          <Menu size={52} />
+          <Menu size={32} />
         </button>
       </div>
 
-      {/* Sidebar for PC and mobile (toggleable) */}
+      {/* ✅ Sidebar for Both Desktop and Mobile */}
       <div
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-primaryBg text-white transform transition-transform duration-300 ease-in-out
-        ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 md:relative md:w-96 md:flex md:flex-col md:p-4 md:space-y-4`}
+        className={`fixed top-0 md:top-0 left-0 z-40 h-full w-64 bg-primaryBg text-white transform transition-transform duration-300 ease-in-out
+        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
+        md:translate-x-0 md:relative md:w-96 md:flex md:flex-col`}
       >
-        {/* Logo */}
-        <div className="hidden md:block">
-          <img src="/logo1.jpg" alt="Logo" className="w-72 h-auto mt-2 mb-1" />
+        <div className="overflow-y-auto h-full md:h-auto md:p-4 md:space-y-4 pt-20 md:pt-4">
+          {/* ✅ Show logo ONLY in Desktop view */}
+          <div className="hidden md:flex justify-center md:justify-start mb-6">
+            <img src="/logo1.jpg" alt="Logo" className="w-72 h-auto" />
+          </div>
+
+          {/* ✅ Menu Items */}
+          {menuItems.map((item) => {
+            const isActive =
+              location.pathname === item.path ||
+              (item.subMenu &&
+                item.subMenu.some((sub) => location.pathname === sub.path));
+
+            return (
+              <div key={item.name}>
+                <button
+                  className={`flex items-center space-x-3 px-4 py-3 w-full text-left transition-all duration-300 rounded-lg hover:bg-[#007a9c] ${
+                    isActive ? "bg-[#00a2cd]" : ""
+                  }`}
+                  onClick={() => {
+                    if (item.hasSubMenu) {
+                      toggleSubMenu(item.name);
+                    } else {
+                      navigate(item.path);
+                      setIsMobileOpen(false);
+                    }
+                  }}
+                >
+                  {item.icon}
+                  <span className="font-medium">{item.name}</span>
+                </button>
+
+                {/* Submenu Items */}
+                {item.hasSubMenu && showSubMenus[item.name] && (
+                  <div className="ml-8 space-y-2">
+                    {item.subMenu.map((sub) => (
+                      <button
+                        key={sub.name}
+                        className={`flex items-center space-x-3 p-2 w-full text-left transition-all duration-300 rounded-md hover:bg-[#007a9c] ${
+                          location.pathname === sub.path ? "bg-[#00a2cd]" : ""
+                        }`}
+                        onClick={() => {
+                          navigate(sub.path);
+                          setIsMobileOpen(false);
+                        }}
+                      >
+                        {sub.icon}
+                        <span>{sub.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* ✅ Logout Button */}
+          <div className="mt-auto p-4 border-t border-white/30">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-3 w-full text-left hover:bg-[#007a9c] transition-all duration-300 p-2 rounded-lg"
+            >
+              <LogOut size={24} />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
-        <div className="md:hidden flex justify-end p-2">
-          <button onClick={() => setIsMobileOpen(false)} className="text-xl">
-            ✕
-          </button>
-        </div>
-
-        {menuItems.map((item) => {
-          const isActive =
-            location.pathname === item.path ||
-            (item.subMenu &&
-              item.subMenu.some((sub) => location.pathname === sub.path));
-
-          return (
-            <div key={item.name}>
-              <button
-                className={`flex items-center space-x-3 p-3 transition-all duration-300 w-full text-left ${
-                  isActive ? "bg-[#00a2cd]" : ""
-                }`}
-                onClick={() => {
-                  if (item.hasSubMenu) {
-                    toggleSubMenu(item.name);
-                  } else {
-                    navigate(item.path);
-                    setIsMobileOpen(false); // close on mobile after click
-                  }
-                }}
-              >
-                {item.icon}
-                <span>{item.name}</span>
-              </button>
-
-              {item.hasSubMenu && showSubMenus[item.name] && (
-                <div className="ml-8 space-y-2">
-                  {item.subMenu.map((sub) => (
-                    <button
-                      key={sub.name}
-                      className={`flex items-center space-x-3 p-2 transition-all duration-300 hover:bg-[#007a9c] w-full text-left ${
-                        location.pathname === sub.path ? "bg-[#00a2cd]" : ""
-                      }`}
-                      onClick={() => {
-                        navigate(sub.path);
-                        setIsMobileOpen(false); // close on mobile after click
-                      }}
-                    >
-                      {sub.icon}
-                      <span>{sub.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
       </div>
     </>
   );
