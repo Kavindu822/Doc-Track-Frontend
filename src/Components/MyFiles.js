@@ -22,7 +22,7 @@ const MyFiles = () => {
   const fetchFiles = async () => {
     try {
       const token = localStorage.getItem("jwtToken");
-      const response = await axios.get(`/api/RcodeFiles/my-files`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/RcodeFiles/my-files`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

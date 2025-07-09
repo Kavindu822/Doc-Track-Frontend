@@ -18,7 +18,7 @@ const GenerateQR = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/RcodeFiles/${rcode}/qr`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/RcodeFiles/${rcode}/qr`);
       if (!response.ok) {
         const data = await response.json();
         setError(data.message || "Failed to fetch QR Code");

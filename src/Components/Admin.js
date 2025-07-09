@@ -284,7 +284,7 @@ const Admin = () => {
       try {
         const token = localStorage.getItem("jwtToken");
 
-        const res = await axios.get(`/api/UserAccounts/admins`, {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/UserAccounts/admins`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -323,7 +323,7 @@ const Admin = () => {
     if (!selectedEmployee) return;
 
     try {
-      await axios.delete(`/api/UserAccounts/delete/${selectedEmployee.epfNo}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/UserAccounts/delete/${selectedEmployee.epfNo}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         },
@@ -345,7 +345,7 @@ const Admin = () => {
 
     try {
       await axios.post(
-        `/api/UserAccounts/admin-reset-password`,
+        `${process.env.REACT_APP_API_URL}/UserAccounts/admin-reset-password`,
         {
           epfNo: selectedEmployee.epfNo,
           temporaryPassword,

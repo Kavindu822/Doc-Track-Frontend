@@ -200,7 +200,7 @@ const SeatTransfer = ({ selectedFiles, onCancel, onTransferComplete }) => {
       try {
         const token = localStorage.getItem("jwtToken");
         const response = await fetch(
-          `/api/UserAccounts/eligible-seat-transfer-users`,
+          `${process.env.REACT_APP_API_URL}/UserAccounts/eligible-seat-transfer-users`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -232,7 +232,7 @@ const SeatTransfer = ({ selectedFiles, onCancel, onTransferComplete }) => {
   const handleFileTransfer = async (emp) => {
     try {
       const token = localStorage.getItem("jwtToken");
-      const response = await fetch(`/api/RcodeFiles/update-multi-files`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/RcodeFiles/update-multi-files`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

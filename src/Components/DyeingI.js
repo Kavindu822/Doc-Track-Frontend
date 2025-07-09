@@ -275,7 +275,7 @@ const DyeingI = () => {
     const fetchEmployees = async () => {
       try {
         const res = await axios.get(
-          `/api/UserAccounts/employees-by-department/Dyeing-India`,
+          `${process.env.REACT_APP_API_URL}/UserAccounts/employees-by-department/Dyeing-India`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -316,7 +316,7 @@ const DyeingI = () => {
     if (!selectedEmployee) return;
 
     try {
-      await axios.delete(`/api/UserAccounts/delete/${selectedEmployee.epfNo}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/UserAccounts/delete/${selectedEmployee.epfNo}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         },
@@ -338,7 +338,7 @@ const DyeingI = () => {
 
     try {
       await axios.post(
-        `/api/UserAccounts/admin-reset-password`,
+        `${process.env.REACT_APP_API_URL}/UserAccounts/admin-reset-password`,
         {
           epfNo: selectedEmployee.epfNo,
           temporaryPassword,

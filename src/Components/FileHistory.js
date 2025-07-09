@@ -223,7 +223,7 @@ const FileHistory = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await axios.get(`/api/RcodeFiles/history`, {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/RcodeFiles/history`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           },

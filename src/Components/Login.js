@@ -15,7 +15,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/UserAccounts/login`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/UserAccounts/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -135,7 +135,7 @@ const Login = () => {
               title="Track your document"
             >
               <img
-                src="/arrow.jpg"
+                src="arrow.jpg"
                 alt="Track Arrow"
                 className="w-40 object-contain"
               />

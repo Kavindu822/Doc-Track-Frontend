@@ -9,7 +9,7 @@ const MyProfile = () => {
       try {
         const token = localStorage.getItem("jwtToken"); // token from login
 
-        const res = await fetch(`/api/UserAccounts/profile`, {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/UserAccounts/profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

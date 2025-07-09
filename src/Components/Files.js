@@ -399,7 +399,7 @@ const Files = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `/api/RcodeFiles/files-by-department/${dept}`
+        `${process.env.REACT_APP_API_URL}/RcodeFiles/files-by-department/${dept}`
       );
       setFiles(response.data);
       setError(null);
@@ -414,7 +414,7 @@ const Files = () => {
   const fetchEmployees = async (dept) => {
     try {
       const response = await axios.get(
-        `/api/UserAccounts/receive-employees/${dept}`
+        `${process.env.REACT_APP_API_URL}/UserAccounts/receive-employees/${dept}`
       );
       const simplifiedEmployees = response.data.map((emp) => ({
         epfNo: emp.epfNo,
@@ -451,7 +451,7 @@ const Files = () => {
     if (selectedFiles.length > 0) {
       const rCodes = selectedFiles.map((f) => f.rcode);
       try {
-        const response = await axios.delete(`/api/RcodeFiles`, {
+        const response = await axios.delete(`${process.env.REACT_APP_API_URL}/RcodeFiles`, {
           data: rCodes,
         });
         alert(response.data.message);
@@ -478,7 +478,7 @@ const Files = () => {
       };
       try {
         const response = await axios.put(
-          `/api/RcodeFiles/update-multi-files`,
+          `${process.env.REACT_APP_API_URL}/RcodeFiles/update-multi-files`,
           transferData
         );
         alert(response.data.message);

@@ -428,15 +428,25 @@ const SignUp = () => {
 
       {/* Signup Form Panel */}
       <div className="flex items-center justify-center w-full md:w-3/5 h-full p-5 bg-[#0E2339]">
-        <form className="w-full space-y-12 max-w-3xl" onSubmit={handleSubmit}>
-          <div className="flex justify-center md:justify-end mt-4 md:mt-2 mb-20 md:mb-28">
-            <img src="/logo1.jpg" alt="Logo" className="w-[32rem] h-auto" />
+        <form
+          className="w-full space-y-8 max-w-4xl px-4 md:px-8"
+          onSubmit={handleSubmit}
+        >
+          {/* Logo */}
+          <div className="flex justify-center md:justify-end mt-6 md:mt-2 mb-10 md:mb-16">
+            <img
+              src="/logo1.jpg"
+              alt="Logo"
+              className="w-60 md:w-[28rem] h-auto"
+            />
           </div>
+
+          {/* Two column input sections */}
           <div className="flex flex-col md:flex-row gap-4">
             {/* Left Inputs */}
             <div className="flex-1 space-y-4">
               <input
-                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                 placeholder="Employee Name"
                 type="text"
                 name="employeeName"
@@ -444,7 +454,7 @@ const SignUp = () => {
                 onChange={handleChange}
               />
               <input
-                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                 placeholder="Contact Number"
                 type="number"
                 name="contactNumber"
@@ -453,7 +463,7 @@ const SignUp = () => {
               />
               <div className="relative">
                 <select
-                  className="appearance-none text-center w-full pl-4 pr-10 py-3 border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                  className="appearance-none text-center w-full px-4 py-3 border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
@@ -466,30 +476,20 @@ const SignUp = () => {
                 </select>
                 <FaAngleDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" />
               </div>
-              <div className="relative">
-                <input
-                  className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
-                  placeholder="Seat Number"
-                  type="text"
-                  name="seatNumber"
-                  value={formData.seatNumber}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
-                </button>
-              </div>
+              <input
+                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
+                placeholder="Seat Number"
+                type="text"
+                name="seatNumber"
+                value={formData.seatNumber}
+                onChange={handleChange}
+              />
             </div>
 
             {/* Right Inputs */}
             <div className="flex-1 space-y-4">
               <input
-                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                className="w-full p-3 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                 placeholder="EPF Number"
                 type="text"
                 name="epfNumber"
@@ -498,7 +498,7 @@ const SignUp = () => {
               />
               <div className="relative">
                 <select
-                  className="appearance-none text-center w-full pl-4 pr-10 py-3 border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                  className="appearance-none text-center w-full px-4 py-3 border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                   name="department"
                   value={formData.department}
                   onChange={handleChange}
@@ -514,7 +514,7 @@ const SignUp = () => {
               </div>
 
               <input
-                className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -523,7 +523,7 @@ const SignUp = () => {
               />
               <div className="relative">
                 <input
-                  className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd] transition duration-200"
+                  className="w-full p-3 pr-10 text-center border rounded-full text-secondaryText border-borderColor bg-primaryBg focus:ring-2 focus:ring-[#00a2cd]"
                   placeholder="Confirm Password"
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
@@ -546,16 +546,20 @@ const SignUp = () => {
             </div>
           </div>
 
+          {/* Error Message */}
           {error && (
             <p className="text-center text-red-600 font-semibold">{error}</p>
           )}
 
-          <button
-            type="submit"
-            className="w-72 py-3 mb-32 rounded-full bg-[#00a2cd] hover:bg-[#008bb1] text-white font-bold transition duration-200 mx-auto block"
-          >
-            Sign Up
-          </button>
+          {/* Submit Button */}
+          <div className="flex justify-center mt-6 mb-10">
+            <button
+              type="submit"
+              className="w-full max-w-xs py-3 rounded-full bg-[#00a2cd] hover:bg-[#008bb1] text-white font-bold transition duration-200"
+            >
+              Sign Up
+            </button>
+          </div>
         </form>
       </div>
     </div>

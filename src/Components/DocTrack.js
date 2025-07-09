@@ -314,7 +314,7 @@ const DocTrack = () => {
     setShowHistory(false);
 
     try {
-      const response = await fetch(`/api/RcodeFiles/search/${searchCode}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/RcodeFiles/search/${searchCode}`);
       if (!response.ok) {
         throw new Error("Document not found or an error occurred.");
       }
@@ -337,7 +337,7 @@ const DocTrack = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/RcodeFiles/search-history/${rcode}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/RcodeFiles/search-history/${rcode}`);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(

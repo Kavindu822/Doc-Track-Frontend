@@ -308,7 +308,7 @@ const AddFiles = () => {
     };
 
     try {
-      const response = await axios.post(`/api/RcodeFiles`, newFile);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/RcodeFiles`, newFile);
 
       if (response.status === 200 || response.status === 201) {
         setSuccess("File added successfully!");

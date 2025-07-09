@@ -12,7 +12,7 @@ const Pending = () => {
     try {
       const token = localStorage.getItem("jwtToken");
       const response = await axios.get(
-        `/api/UserAccounts/not-approved-users-by-department/${dept}`,
+        `${process.env.REACT_APP_API_URL}/UserAccounts/not-approved-users-by-department/${dept}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ const Pending = () => {
   const handleRemove = async (epfNo) => {
     if (!window.confirm("Are you sure you want to remove this user?")) return;
     try {
-      const response = await fetch(`/api/UserAccounts/delete/${epfNo}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/UserAccounts/delete/${epfNo}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,

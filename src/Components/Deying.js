@@ -266,7 +266,7 @@ const Deying = () => {
     const fetchEmployees = async () => {
       try {
         const res = await axios.get(
-          "/api/UserAccounts/employees-by-department/Deying",
+          `${process.env.REACT_APP_API_URL}/UserAccounts/employees-by-department/Deying`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -308,7 +308,7 @@ const Deying = () => {
     if (!selectedEmployee) return;
     const { epfNo } = selectedEmployee;
     try {
-      await axios.delete(`/api/UserAccounts/delete/${epfNo}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/UserAccounts/delete/${epfNo}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         },
@@ -330,7 +330,7 @@ const Deying = () => {
 
     try {
       await axios.post(
-        "/api/UserAccounts/admin-reset-password",
+        `${process.env.REACT_APP_API_URL}/UserAccounts/admin-reset-password`,
         {
           epfNo: emp.epfNo,
           temporaryPassword: tempPassword,

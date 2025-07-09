@@ -170,7 +170,7 @@ const MyHistory = () => {
         return;
       }
 
-      const response = await axios.get(`/api/RcodeFiles/my-history`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/RcodeFiles/my-history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

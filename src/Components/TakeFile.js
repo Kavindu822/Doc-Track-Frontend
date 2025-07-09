@@ -287,7 +287,7 @@ const TakeFile = () => {
 
     try {
       await axios.put(
-        `/api/RcodeFiles/transfer-files-to-employee-or-via-qr`,
+        `${process.env.REACT_APP_API_URL}/RcodeFiles/transfer-files-to-employee-or-via-qr`,
         decodedJson,
         {
           headers: { Authorization: `Bearer ${token}` },
